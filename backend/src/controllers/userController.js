@@ -89,9 +89,13 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password, recaptchaToken } = req.body;
 
-    if (!name || !email || !password || !recaptchaToken) {
+    if (!name || !email || !password ) {
       return res.status(400).json({ message: "All fields are required." });
     }
+
+    // if (!name || !email || !password || !recaptchaToken) {
+    //   return res.status(400).json({ message: "All fields are required." });
+    // }
 
     // Generate OTP
     const otp = otpGenerator.generate(6, {
