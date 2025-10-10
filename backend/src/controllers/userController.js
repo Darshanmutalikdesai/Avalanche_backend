@@ -87,9 +87,9 @@ const spaceMail = (title, message, otp, name) => `
 // ================= REGISTER =================
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, rollNumber, institute } = req.body;
+    const { name, email, pNumber, password, rollNumber, institute } = req.body;
 
-    if (!name || !email || !password || !rollNumber || !institute) {
+    if (!name || !email || !pNumber || !password || !rollNumber || !institute) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -112,6 +112,7 @@ export const registerUser = async (req, res) => {
     const newUser = new User({
       name,
       email,
+      pNumber,
       password: hashedPassword,
       rollNumber,
       institute,

@@ -19,6 +19,7 @@ export const registerUserService = async ({ name, email, password, otp }) => {
   const newUser = await createUser({
     name,
     email,
+    pNumber,
     password: hashedPassword,
     otp,
     otpExpiresAt: otpExpiry,

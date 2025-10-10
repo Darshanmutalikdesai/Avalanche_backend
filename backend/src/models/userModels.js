@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
   },
+  pNumber : {
+    type: String,
+    required : true,
+  },
   password: {
     type: String,
     required: true,
