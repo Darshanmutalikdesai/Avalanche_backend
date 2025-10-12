@@ -1,6 +1,6 @@
-// server.js
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors"; // ✅ Import cors
 import connectDB from "./src/config/db.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import cors from "cors";
@@ -13,6 +13,10 @@ const app = express();
 app.use(cors({
   origin: "http://localhost:5173", // frontend URL
   credentials: true, // allow cookies if needed
+// ✅ Enable CORS
+app.use(cors({
+  origin: "http://localhost:5173", // frontend URL
+  credentials: true, // allow cookies if needed
 }));
 
 app.use(express.json());
