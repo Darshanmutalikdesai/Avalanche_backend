@@ -13,8 +13,8 @@ import {
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "aavalanche2025@gmail.com",
-    pass: "ikjkunquknkqrxnm", // ⚠️ Hardcoded App Password
+    user: "avalanche25@git.edu",
+    pass: "rmwdnakckgwuxoxd",
   },
 });
 
@@ -87,15 +87,14 @@ const spaceMail = (title, message, otp, name) => `
 // ================= REGISTER =================
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, recaptchaToken } = req.body;
+    const { name, email, pNumber, password, rollNumber, institute } = req.body;
 
-    if (!name || !email || !password ) {
+    if (!name || !email || !pNumber || !password || !rollNumber || !institute) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    // if (!name || !email || !password || !recaptchaToken) {
-    //   return res.status(400).json({ message: "All fields are required." });
-    // }
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "User already exists." });
 
     // Generate OTP
     const otp = otpGenerator.generate(6, {
@@ -105,25 +104,47 @@ export const registerUser = async (req, res) => {
       specialChars: false,
     });
 
-    // Save user + OTP
-    await registerUserService({ name, email, password, otp });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const otpExpiresAt = Date.now() + 5 * 60 * 1000; // 5 mins
 
-    // Send mail
-    await transporter.sendMail({
-      from: `"Avalanche 2024 ❄️" <aavalanche2025@gmail.com>`,
-      to: email,
-      subject: "🔐 Avalanche 2024 - OTP Verification Code",
-      html: spaceMail("AVALANCHE 2024", "We’ve received your registration request. Use the OTP below to verify your email:", otp, name),
+    // Save user
+    const newUser = new User({
+      name,
+      email,
+      pNumber,
+      password: hashedPassword,
+      rollNumber,
+      institute,
+      otp,
+      otpExpiresAt,
+      isVerified: false,
     });
 
-    return res.status(200).json({
-      message: "OTP sent to email. Please verify to complete registration.",
+    await newUser.save();
+
+    // 📧 Send Space-styled email
+    await transporter.sendMail({
+      from: `"Avalanche 2024 ❄️" <avalanche25@git.edu>`,
+      to: email,
+      subject: "🚀 Avalanche 2025 - Verify Your Account",
+      html: spaceMail(
+        "AVALANCHE 2025",
+        "Welcome aboard, cadet! 🚀 Use the OTP below to verify your account and begin your cosmic journey with Avalanche.",
+        otp,
+        name
+      ),
+    });
+
+    res.status(200).json({
+      message: `OTP sent to your email ${email} . Please verify to complete registration.`,
     });
   } catch (error) {
     console.error("Error in registerUser:", error.message);
-    return res.status(500).json({ message: error.message || "Server error." });
+    res.status(500).json({ message: "Server error." });
   }
 };
+
 
 
 //================LOGIN=========================
@@ -148,21 +169,12 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials." });
     }
 
-    // Generate JWT
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    // Generate JWT (encode only userId)
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
     return res.status(200).json({
       message: "Login successful.",
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      }
     });
   } catch (error) {
     console.error("Error in loginUser:", error.message);
@@ -174,16 +186,19 @@ export const loginUser = async (req, res) => {
 //===============GET USER================
 export const getProfile = async (req, res) => {
   try {
-    // `req.user` is coming from protect middleware (decoded JWT payload)
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found." });
+
     return res.status(200).json({
       message: "User profile fetched successfully",
-      user: req.user,
+      user,
     });
   } catch (error) {
     console.error("Error in getProfile:", error.message);
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 
 
 

@@ -3,12 +3,16 @@ import dotenv from "dotenv";
 import cors from "cors"; // ✅ Import cors
 import connectDB from "./src/config/db.js";
 import userRoutes from "./src/routes/userRoutes.js";
+import cors from "cors";
 
 dotenv.config();
 connectDB();
 
 const app = express();
 
+app.use(cors({
+  origin: "http://localhost:5173", // frontend URL
+  credentials: true, // allow cookies if needed
 // ✅ Enable CORS
 app.use(cors({
   origin: "http://localhost:5173", // frontend URL
@@ -16,6 +20,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
 
 // 4️⃣ Mount user routes
 app.use("/api/users", userRoutes);

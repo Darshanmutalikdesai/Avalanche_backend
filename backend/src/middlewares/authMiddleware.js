@@ -1,14 +1,19 @@
 import jwt from "jsonwebtoken";
+import User from "../models/userModels.js";
 
-export const protect = (req, res, next) => {
+export const protect = async (req, res, next) => {
   let token = req.headers.authorization;
-  const JWT_SECRET = "myverystrongsecretkey"
+  const JWT_SECRET = "myverystrongsecretkey";
 
   if (token && token.startsWith("Bearer ")) {
     token = token.split(" ")[1]; // Extract actual token
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      req.user = decoded; // Attach user data to request
+      const user = await User.findById(decoded.id).select("-password"); // fetch full user info
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+      req.user = user; // attach complete user to request
       return next();
     } catch (err) {
       return res.status(401).json({ message: "Invalid or expired token." });

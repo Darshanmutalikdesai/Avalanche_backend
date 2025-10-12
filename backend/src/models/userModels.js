@@ -16,29 +16,29 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
   },
+  pNumber : {
+    type: String,
+    required : true,
+  },
   password: {
     type: String,
     required: true,
   },
-
-  // 🔹 OTP for registration
-  otp: {
+  rollNumber: {
     type: String,
+    required: true,
+    trim: true,
   },
-  otpExpiresAt: {
-    type: Date,
+  institute: {
+    type: String,
+    required: true,
+    trim: true,
   },
+  otp: String,
+  otpExpiresAt: Date,
   isVerified: {
     type: Boolean,
     default: false,
-  },
-
-  // 🔹 Password reset fields
-  resetOTP: {
-    type: String,
-  },
-  resetOTPExpiry: {
-    type: Date,
   },
 }, { timestamps: true });
 
