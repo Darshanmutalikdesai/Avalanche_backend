@@ -1,6 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";
 import connectDB from "./src/config/db.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import eventRoutes from "./src/routes/eventRoutes.js"; // ✅ Add event routes
@@ -15,13 +14,7 @@ connectDB();
 const app = express();
 
 // ✅ Middleware
-app.use(express.json());
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    credentials: true,
-  })
-);
+app.use(express.json()); // JSON parsing
 
 // ✅ API Routes
 app.use("/api/users", userRoutes);
